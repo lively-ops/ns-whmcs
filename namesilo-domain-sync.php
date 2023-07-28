@@ -14,6 +14,15 @@ require '../../../init.php';
 require '../../../includes/functions.php';
 require '../../../includes/registrarfunctions.php';
 
+
+/*
+ * Grab Extended Features Dependencies
+ */
+
+require_once 'domain-state-handler.php';
+require_once 'namesilo-helpers.php';
+
+
 use WHMCS\Database\Capsule;
 
 /*****************************************/
@@ -118,11 +127,21 @@ foreach ($queryresult as $data) {
 	if (!empty($result["expiry"])) {
 		$expirydate = $result ["expiry"];
 		$status = $result ["status"];
+		$tld = extractTLDFromDomain($domainname);
+		$currentExpiryDate = Capsule::table("tbldomains")->where("domain", '=', $domainname)->pluck('expirydate');
+		$domainState = calculateDomainState($currentExpiryDate, $expirydate, $tld);
+
 		if ($status == 'Active') {
 			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["status" => "Active"]);
 		}
+
+		if(!$domainState == 'Active') {
+			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["status" => $domainState]);
+		}
+
 		if ($expirydate) {
 			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["expirydate" => $expirydate]);
+
 			if (@$ns_sync_next_due_date == 'on') {
 				Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["nextduedate" => $expirydate]);
 			}
