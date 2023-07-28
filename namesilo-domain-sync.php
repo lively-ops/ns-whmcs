@@ -128,7 +128,7 @@ foreach ($queryresult as $data) {
 		$expirydate = $result ["expiry"];
 		$status = $result ["status"];
 		$tld = extractTLDFromDomain($domainname);
-		$currentExpiryDate = Capsule::table("tbldomains")->where("domain", '=', $domainname)->pluck('expirydate');
+		$currentExpiryDate = Capsule::table("tbldomains")->where("domain", '=', $domainname)->value('expirydate');
 		$domainState = calculateDomainState($currentExpiryDate, $expirydate, $tld);
 
 		if ($status == 'Active') {
