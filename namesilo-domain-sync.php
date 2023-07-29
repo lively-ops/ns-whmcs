@@ -19,7 +19,6 @@ require '../../../includes/registrarfunctions.php';
  * Grab Extended Features Dependencies
  */
 
-require_once 'domain-state-handler.php';
 require_once 'namesilo-helpers.php';
 
 
@@ -126,17 +125,11 @@ foreach ($queryresult as $data) {
 	# Process results
 	if (!empty($result["expiry"])) {
 		$expirydate = $result ["expiry"];
-		$status = $result ["status"];
-		$tld = extractTLDFromDomain($domainname);
-		$currentExpiryDate = Capsule::table("tbldomains")->where("domain", '=', $domainname)->value('expirydate');
-		$domainState = calculateDomainState($currentExpiryDate, $expirydate, $tld);
+		$apiStatus = $result ["status"];
+		$status = mapApiStatusToWhmcsStatus($apiStatus);
 
-		if ($status == 'Active') {
-			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["status" => "Active"]);
-		}
-
-		if(!$domainState == 'Active') {
-			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["status" => $domainState]);
+		if ($status) {
+			Capsule::table("tbldomains")->where("domain", '=', $domainname)->update(["status" => $status]);
 		}
 
 		if ($expirydate) {

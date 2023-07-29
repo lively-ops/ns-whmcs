@@ -20,3 +20,31 @@ function extractTLDFromDomain($domain) {
     // Return null if TLD cannot be extracted
     return null;
 }
+
+
+/**
+ * Function to map API domain status to standard WHMCS domain status response
+ *
+ * @param string $apiStatus The domain status retrieved from the API
+ * @return string Standard WHMCS domain status response (e.g., 'Active', 'Expired', 'Grace', etc.)
+ */
+function mapApiStatusToWhmcsStatus($apiStatus) {
+    switch ($apiStatus) {
+        case 'Pending Outbound Transfer':
+            return 'Pending Transfer';
+        case 'Active':
+            return 'Active';
+        case 'Deleted':
+            return 'Expired';
+        case 'Expired (grace period)':
+            return 'Grace';
+        case 'Expired (pending delete)':
+            return 'Pending Delete';
+        case 'Expired (restore period)':
+            return 'Redemption';
+        default:
+            return 'Inactive';
+    }
+}
+
+
